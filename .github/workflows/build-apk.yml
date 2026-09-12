@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Fast APK Build
 
 on:
   push:
@@ -26,14 +26,17 @@ jobs:
         with:
           node-version: 18
 
-      - name: Build APK via Bubblewrap
+      - name: Build APK via Cordova
         run: |
-          npm install -g @bubblewrap/cli
-          yes "N" | npx @bubblewrap/cli init --manifest=https://raw.githubusercontent.com/${{ github.repository }}/main/manifest.json
-          npx @bubblewrap/cli build --skipSigning
+          npm install -g cordova
+          cordova create appcom com.onescreensolutions.write "OneScreen Write"
+          cp index.html style.css app.js manifest.json appcom/www/ 2>/dev/null || cp index.html style.css app.js appcom/www/
+          cd appcom
+          cordova platform add android
+          cordova build android --debug
 
       - name: Save APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Interactive-Whiteboard-APK
-          path: ./*.apk
+          name: OneScreenWrite
+          path: appcom/platforms/android/app/build/outputs/apk/debug/app-debug.apk
